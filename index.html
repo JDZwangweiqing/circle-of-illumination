@@ -625,7 +625,11 @@ float rY(int i) {
    |纬度|(度) → (κ = 1/纬圈半径ρ, H = ρ·δn = 该纬线投影半长)，单位为地球半径 R。
    官方 1:1000 万设计表（ρ cm / δn）线性插值；赤道为直线（κ=0, H=π），极点为半长 π/2 的圆弧 */
 vec2 edKH(float ad) {
-  if (ad <= 10.0) { float t = ad * 0.1; return vec2(mix(0.0, 0.021981587, t), mix(3.141592654, 3.098900334, t)); }
+  // 0~10°：H 用三次 Hermite（H'(0)=0 使经线垂直平滑穿过赤道，H'(10) 接上段线性斜率），κ 仍线性
+  if (ad <= 10.0) { float t = ad * 0.1;
+    return vec2(0.021981587 * t,
+                (2.0*t*t*t - 3.0*t*t + 1.0) * 3.141592654 + (-2.0*t*t*t + 3.0*t*t) * 3.098900334
+              + (t*t*t - t*t) * -0.069419302); }
   if (ad <= 15.0) { float t = (ad - 10.0) * 0.2; return vec2(mix(0.021981587, 0.032101877, t), mix(3.098900334, 3.064190683, t)); }
   if (ad <= 20.0) { float t = (ad - 15.0) * 0.2; return vec2(mix(0.032101877, 0.043919162, t), mix(3.064190683, 3.018663024, t)); }
   if (ad <= 23.44) { float t = (ad - 20.0) / 3.44; return vec2(mix(0.043919162, 0.051510122, t), mix(3.018663024, 2.980971178, t)); }
@@ -1385,7 +1389,7 @@ function locNear(e, scr, scale) {                      // 光标是否在地点�
   if (!scr) return false;
   const r = cv.getBoundingClientRect();
   const mx = (e.clientX - r.left) * scale, my = (e.clientY - r.top) * scale;
-  return Math.hypot(mx - scr.x, my - scr.y) < 26 * scale;
+  return Math.hypot(mx - scr.x, my - scr.y) < 40 * scale;   // 40：覆盖放大 1 倍后的头球顶部
 }
 cv.addEventListener('pointerdown', e => {
   if (state.locOn && state.view === 'globe' && locNear(e, window.__locScr3D, dpr)) {
@@ -1629,24 +1633,30 @@ function render() {
 }
 
 /* ---------------- 2D 覆盖层：太阳、直射点、极点标注 ---------------- */
-/* 地点符号（地图定位针）：黄色圆头 + 尾尖 + 中心孔，s 为像素比例（3D 用 dpr，平面用 k*dprF） */
+/* 地点符号（红色图钉）：红色圆头 + 白色高光 + 针杆 + 喇叭底座，s 为像素比例（3D 用 dpr，平面用 k*dprF）；
+   锚点 (x,y) = 底座底部，即地点位置 */
 function drawLocPin(c, x, y, s) {
-  const hr = 5.2 * s, tail = 11.5 * s;        // 头部半径 / 尾尖偏移
+  const hr = 5.2 * s;                          // 头部球半径
+  const hy = -11.6 * s;                        // 头部圆心（相对锚点）
   c.save();
   c.translate(x, y);
-  c.beginPath();                               // 尾三角（与头部圆相切）
-  c.moveTo(-hr * 0.72, -hr * 0.72);
-  c.quadraticCurveTo(-hr * 0.15, -hr * 0.15, 0, tail);
-  c.quadraticCurveTo(hr * 0.15, -hr * 0.15, hr * 0.72, -hr * 0.72);
-  c.arc(0, -tail + hr, hr, Math.PI * 0.75, Math.PI * 0.25, false);
-  c.closePath();
-  c.fillStyle = '#ffd54a';
+  c.lineWidth = Math.max(1, 1.4 * s);
   c.strokeStyle = 'rgba(25,30,45,.9)';
-  c.lineWidth = Math.max(1, 1.6 * s);
+  c.beginPath();                               // 针杆（底座随后盖住其下端）
+  c.rect(-0.9 * s, hy + hr * 0.5, 1.8 * s, (-2.0 * s) - (hy + hr * 0.5));
+  c.fillStyle = '#d81e1e';
   c.fill(); c.stroke();
-  c.beginPath();                               // 中心孔
-  c.arc(0, -tail + hr, hr * 0.38, 0, 7);
-  c.fillStyle = 'rgba(25,30,45,.92)';
+  c.beginPath();                               // 底座（喇叭形脚）
+  c.ellipse(0, -1.7 * s, 3.3 * s, 1.7 * s, 0, 0, 7);
+  c.fillStyle = '#d81e1e';
+  c.fill(); c.stroke();
+  c.beginPath();                               // 头部圆球
+  c.arc(0, hy, hr, 0, 7);
+  c.fillStyle = '#e42121';
+  c.fill(); c.stroke();
+  c.beginPath();                               // 白色高光（左上）
+  c.arc(-hr * 0.36, hy - hr * 0.36, hr * 0.24, 0, 7);
+  c.fillStyle = '#ffffff';
   c.fill();
   c.restore();
 }
@@ -1710,8 +1720,8 @@ function drawOverlay() {
       let sp = facing > 0.03 ? projectWorld(wpt) : null;
       window.__locScr3D = sp ? { x: sp.x, y: sp.y } : null;
       if (sp) {
-        drawLocPin(c, sp.x, sp.y, dpr);
-        drawTag(c, fs, sp.x + 11 * dpr, sp.y + 4 * dpr, '地点', 'left', 'rgba(255,213,74,0.98)');
+        drawLocPin(c, sp.x, sp.y, 2 * dpr);
+        drawTag(c, fs, sp.x + 16 * dpr, sp.y + 4 * dpr, '地点', 'left', 'rgba(255,138,128,0.98)');
       }
     }
     // 极点 N / S：被地球遮挡才隐藏（侧视时两极标记均在球轮廓外，都应显示）
@@ -2039,6 +2049,11 @@ const ED = (() => {
     let i = 0;
     while (i < 13 && A > KN[i + 1]) i++;
     const t = (A - KN[i]) / (KN[i + 1] - KN[i]);
+    if (i === 0) {                       // 0~10°：H 用三次 Hermite（H'(0)=0，H'(10) 接上段线性斜率）
+      const h00 = 2*t*t*t - 3*t*t + 1, h01 = -2*t*t*t + 3*t*t, h11 = t*t*t - t*t;
+      const m1 = (HH[2] - HH[1]) / (KN[2] - KN[1]);       // 每度
+      return [KP[1] * t, h00 * Math.PI + h01 * HH[1] + h11 * (KN[1] - KN[0]) * m1];
+    }
     return [KP[i] + (KP[i + 1] - KP[i]) * t, HH[i] + (HH[i + 1] - HH[i]) * t];
   };
   const fwd = (lon, lat) => {
@@ -2258,8 +2273,8 @@ function drawFlatOverlay() {
       ? [(lq[0] / curProj.ext[0] * 0.5 + 0.5) * w, (0.5 - lq[1] / curProj.ext[1] * 0.5) * h] : null;
     window.__locScrFlat = lp ? { x: lp[0], y: lp[1] } : null;
     if (lp) {
-      drawLocPin(c, lp[0], lp[1], pad(1));
-      drawTagF(c, px(FS.sun), lp[0] + pad(12), lp[1] + pad(2), '地点', 'left', 'rgba(255,213,74,0.98)');
+      drawLocPin(c, lp[0], lp[1], pad(2));
+      drawTagF(c, px(FS.sun), lp[0] + pad(18), lp[1] + pad(2), '地点', 'left', 'rgba(255,138,128,0.98)');
     }
   }
   // 海陆轮廓（海岸线描边，随“显示经纬网”总开关；线宽为原 1/2）
@@ -2536,7 +2551,7 @@ mapwinFit.addEventListener('pointerdown', e => {
     if (br.width && br.height) {
       const mx = (e.clientX - br.left) / br.width * fcv.width;
       const my = (e.clientY - br.top) / br.height * fcv.height;
-      if (Math.hypot(mx - window.__locScrFlat.x, my - window.__locScrFlat.y) < 26 * dprF) {
+      if (Math.hypot(mx - window.__locScrFlat.x, my - window.__locScrFlat.y) < 40 * dprF) {
         locDrag = 'flat';
         mapwinFit.setPointerCapture(e.pointerId);
         moveLocFlat(e);
