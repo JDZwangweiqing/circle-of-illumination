@@ -1093,7 +1093,7 @@ const IDL_PATH = [
   [-5.842, -169.396], [-9.428, -170.993], [-10.01, -171.1], [-13.968, -171.003], [-14.431, -171.237],
   [-15, -172.5], [-45, -172.5], [-51.004, -180], [-90, 180]
 ];
-const DL_PERIOD = 4.6, DL_DASH = 2.6, DL_R = 1.006;
+const DL_PERIOD = 3.0, DL_DASH = 1.7, DL_R = 1.006;   // 第84轮：虚线加密（原 4.6/2.6）
 const DL_IDL_COL = [1.0, 0.36, 0.86, 0.95];    // 品红：国际日期变更线
 const DL_H0_COL = [0.22, 1.0, 0.70, 0.95];     // 春绿：0 时线
 let idlVBO = null, idlColVBO = null, idlN = 0;
@@ -1745,8 +1745,17 @@ function render() {
       gl.enableVertexAttribArray(loc.line.aPos); gl.vertexAttribPointer(loc.line.aPos, 3, gl.FLOAT, false, 0, 0);
       gl.bindBuffer(gl.ARRAY_BUFFER, cb);
       gl.enableVertexAttribArray(loc.line.aCol); gl.vertexAttribPointer(loc.line.aCol, 4, gl.FLOAT, false, 0, 0);
-      gl.drawArrays(gl.LINES, 0, n);
-      gl.drawArrays(gl.LINES, 0, n);
+      // 第84轮：gl.lineWidth 在 WebGL 下恒为 1 设备像素 → NDC 微移多遍叠加加粗
+      // （原为同位两遍，只增不透明度不加宽；现与回归线/极圈同规格，偏移半径 0.85*dpr）
+      const jr3 = Math.max(0.6, dpr * 0.85), jx3 = 2 * jr3 / Math.max(W, 1), jy3 = 2 * jr3 / Math.max(H, 1);
+      const k3 = 0.7071;
+      const offs3 = [[0, 0], [jx3, 0], [-jx3, 0], [0, jy3], [0, -jy3],
+                     [jx3 * k3, jy3 * k3], [jx3 * k3, -jy3 * k3], [-jx3 * k3, jy3 * k3], [-jx3 * k3, -jy3 * k3]];
+      for (const o of offs3) {
+        gl.uniform2f(loc.line.jit, o[0], o[1]);
+        gl.drawArrays(gl.LINES, 0, n);
+      }
+      gl.uniform2f(loc.line.jit, 0, 0);
       gl.disableVertexAttribArray(loc.line.aCol);
     }
     gl.depthMask(true);
@@ -2455,11 +2464,12 @@ function drawFlatOverlay() {
   }
   // 国际日期变更线（真实折线）与 0 时线（各自独立开关）：按当前投影逐点绘制
   if (state.gridOn && (state.idl || state.hour0)) {
-    const lw = Math.max(1, pad(1.7));
-    const dash = [pad(5), pad(4)];
+    const lw = Math.max(1, pad(2.6));          // 第84轮：加粗（原 1.7）
+    const dash = [pad(3), pad(2.4)];           // 第84轮：虚线加密（原 [5,4]）
     const polyline = (pts, color) => {          // pts = [[lon,lat], ...]（经度可为跨接缝顺延值）
       c.save();
       c.strokeStyle = color; c.lineWidth = lw; c.setLineDash(dash);
+      c.lineJoin = 'round';                    // 加粗后 miter 尖刺过长（第84轮）
       c.beginPath();
       let pxs = null, started = false;
       for (const [lo, la] of pts) {
@@ -2512,6 +2522,7 @@ function drawFlatOverlay() {
         for (const off of [-360, 0]) {
           c.save();
           c.strokeStyle = dcolI; c.lineWidth = lw; c.setLineDash(dash);
+          c.lineJoin = 'round';                // 加粗后 miter 尖刺过长（第84轮）
           c.beginPath();
           let started = false;
           for (const [lo, la] of P) {
