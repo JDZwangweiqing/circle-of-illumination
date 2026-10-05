@@ -110,6 +110,21 @@
   .viewbtn:hover{background:rgba(28,52,96,.75);border-color:rgba(160,195,240,.5)}
   .viewbtn.on{background:rgba(38,86,168,.84);border-color:rgba(150,205,255,.75);color:#fff;
     box-shadow:0 0 0 1px rgba(150,205,255,.25),0 4px 16px rgba(60,130,255,.3)}
+  /* 公转示意图窗口：窗口本体（白色圆角面板、太阳、轨道、迷你地球、文字）全部由画布绘制，
+     这里提供可点击的 ≡（三条短横线）收起按钮与贴右缘的「公转」恢复标签；位置由 JS 按窗口常量设置 */
+  .orbclose{position:absolute;z-index:21;width:22px;height:20px;padding:0;display:flex;
+    flex-direction:column;align-items:center;justify-content:center;gap:2.5px;
+    border:1px solid rgba(100,116,139,.42);background:rgba(255,255,255,.55);border-radius:6px;cursor:pointer;transition:.15s}
+  .orbclose i{display:block;width:11px;height:2px;border-radius:1px;background:#4b5b72}
+  .orbclose:hover{background:#eef2f7;border-color:rgba(70,90,120,.65)}
+  .orbclose:hover i{background:#1f334d}
+  .orbclose.hide{display:none}
+  .orbtab{position:absolute;z-index:21;right:0;padding:10px 5px 10px 7px;border:1px solid rgba(100,116,139,.42);
+    border-right:0;background:rgba(255,255,255,.92);color:#33465f;font-size:11px;font-weight:600;
+    writing-mode:vertical-rl;letter-spacing:3px;border-radius:8px 0 0 8px;cursor:pointer;
+    font-family:inherit;line-height:1;box-shadow:-2px 2px 8px rgba(10,20,40,.18)}
+  .orbtab:hover{background:#fff;color:#12233f}
+  .orbtab.hide{display:none}
   .hint{position:absolute;bottom:13px;left:50%;transform:translateX(-50%);color:rgba(190,210,240,.4);font-size:11.5px;pointer-events:none;white-space:nowrap}
   .locinfo{position:absolute;left:16px;bottom:40px;z-index:25;pointer-events:none;min-width:210px;
     background:rgba(10,16,30,.80);border:1px solid rgba(140,175,225,.28);border-radius:10px;
@@ -268,7 +283,7 @@
     <div class="sec-title">太阳直射点纬度（黄赤交角 23°26′ / 季节）</div>
     <div class="readout-row">
       <span class="readout" id="declVal">23°26′N</span>
-      <span class="tag" id="seasonTag">北半球夏至</span>
+      <span class="tag" id="seasonTag" style="display:none">北半球夏至</span>
     </div>
     <input type="range" id="rgDecl" min="-23.44" max="23.44" step="0.02" value="23.44">
     <div class="chips" id="chipsSeason">
@@ -292,13 +307,13 @@
     <label class="ctl"><span>显示昼夜半球（晨昏线）</span>
       <span class="sw"><input type="checkbox" id="ckNight" checked><i></i></span></label>
     <label class="ctl"><span>大气层抬升作用 <span class="mini" style="color:#8fa3bf">（晨昏线向夜侧偏移 0°50′）</span></span>
-      <span class="ck"><input type="checkbox" id="ckRefr"><i></i></span></label>
+      <span class="sw"><input type="checkbox" id="ckRefr"><i></i></span></label>
   </section>
 
   <section class="sec">
     <div class="sec-title">地点选择</div>
     <label class="ctl"><span>显示地点符号（可拖动）</span>
-      <span class="ck"><input type="checkbox" id="ckLoc"><i></i></span></label>
+      <span class="sw"><input type="checkbox" id="ckLoc"><i></i></span></label>
   </section>
 
   <section class="sec">
@@ -307,7 +322,7 @@
       <button class="primary" id="btnSpin">⏸ 暂停自转</button>
       <button id="btnReset" title="恢复本机当前日期与时间下的昼夜分布（视角、日期、时刻全部复位）">↺ 重置</button>
       <img id="sealImg" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAABaCAYAAAA4qEECAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGsGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDIgNzkuMTY0NDg4LCAyMDIwLzA3LzEwLTIyOjA2OjUzICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjIuMCAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDI2LTA5LTEzVDA3OjI0OjU3KzA4OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyNi0wOS0xM1QxNToxMTozOCswODowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyNi0wOS0xM1QxNToxMTozOCswODowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDowZDExYjZkMS03MjVlLTZiNGQtODljZS0zNGMxOWVmMmQ3NmEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NmMwZTEzMTEtNWNiMi1iZDQ2LTg2MGEtMjA5ZmU4NWE4NGI1IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NmMwZTEzMTEtNWNiMi1iZDQ2LTg2MGEtMjA5ZmU4NWE4NGI1Ij4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo2YzBlMTMxMS01Y2IyLWJkNDYtODYwYS0yMDlmZTg1YTg0YjUiIHN0RXZ0OndoZW49IjIwMjYtMDktMTNUMDc6MjQ6NTcrMDg6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyMi4wIChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MjhhODA0NmUtYTM5OS0wOTRiLWEwMDQtYTU2MDkyZWQxMjNlIiBzdEV2dDp3aGVuPSIyMDI2LTA5LTEzVDE1OjA1OjAzKzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjIuMCAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjBkMTFiNmQxLTcyNWUtNmI0ZC04OWNlLTM0YzE5ZWYyZDc2YSIgc3RFdnQ6d2hlbj0iMjAyNi0wOS0xM1QxNToxMTozOCswODowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIyLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqVaIE0AAA/pSURBVHic7V1/bBzHdf727kRS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" alt="wangweiqing 印章" title="wangweiqing"
-           style="height:36px;width:36px;margin-left:17px;align-self:center;opacity:.95;pointer-events:none">
+           style="height:32px;width:32px;margin-left:auto;align-self:center;opacity:.95;pointer-events:none">
     </div>
     <div class="ctl col">
       <span class="mini">自转速度 <b id="spdVal">1.0×</b>（1 天 ≈ 24 秒）</span>
@@ -341,15 +356,17 @@
   <canvas id="gl"></canvas>
   <canvas id="ov"></canvas>
   <div class="hud">
-    <div class="hud-item"><span class="k">直射点</span><b id="hDecl">23°26′N</b><span class="k2" id="hSeason">北半球夏季</span></div>
+    <div class="hud-item"><span class="k">直射点</span><b id="hDecl">23°26′N</b><span class="k2" id="hSeason" style="display:none">北半球夏季</span></div>
     <div class="hud-item"><span class="k">直射经线</span><b id="hLon">0.0°</b></div>
-    <div class="hud-item"><span class="k">日期</span><b id="hDate">2026年6月21日</b><span class="k2" id="hPolar">北极极昼 · 南极极夜</span></div>
+    <div class="hud-item"><span class="k">日期</span><b id="hDate">2026年6月21日</b><span class="k2" id="hPolar" style="display:none">北极极昼 · 南极极夜</span></div>
   </div>
   <div class="viewbtns" id="viewBtns">
     <button class="viewbtn" id="btnView">🗺 平面地图</button>
-    <button class="viewbtn" id="btnTopS" title="从南极正上方沿地轴俯视地球（极点居中，再点一次回到默认赤道视角）">🧭 南极俯视图</button>
-    <button class="viewbtn" id="btnTopN" title="从北极正上方沿地轴俯视地球（极点居中，再点一次回到默认赤道视角）">🧭 北极俯视图</button>
+    <button class="viewbtn" id="btnTopS" title="从南极正上方沿地轴俯视地球（极点居中，太阳位于画面正右方；再点一次回到默认赤道视角）">🧭 南极俯视图</button>
+    <button class="viewbtn" id="btnTopN" title="从北极正上方沿地轴俯视地球（极点居中，太阳位于画面正右方；再点一次回到默认赤道视角）">🧭 北极俯视图</button>
   </div>
+  <button class="orbclose" id="orbClose" title="收起公转示意图（贴右边隐藏，点击右缘「公转」标签可再展开）"><i></i><i></i><i></i></button>
+  <button class="orbtab hide" id="orbTab" title="展开地球公转示意图">公转</button>
   <div class="mapwin" id="mapwin">
     <div class="mapwin-bar" id="mapwinBar">
       <span class="t">🗺 平面地图</span>
@@ -445,6 +462,8 @@ const state = {
   twilight: 0,        // 晨昏线过渡带宽度（0 = 昼夜半球硬分界）
   refr: false,        // 大气层抬升作用：晨昏线向夜侧偏移 0°50′（折射 34′ + 太阳视半径 16′），白昼变长
   locOn: false,       // 地点选择：显示可拖动地点符号
+  orbitOn: true,      // 右下角「地球绕日公转示意图」窗口（可隐藏）
+  orbHide: true,      // 公转窗口贴右边收起（≡ 收起 / 右缘「公转」标签展开）；默认隐藏于右侧
   loc: { lat: 39.9, lon: 116.4 }   // 地点符号位置（地理经纬度，随地球转动）
 };
 const SUN = [1, 0, 0];          // 太阳方向（世界坐标系，固定）
@@ -456,6 +475,7 @@ const cv = document.getElementById('gl');
 const ov = document.getElementById('ov');
 const gl = cv.getContext('webgl', { antialias: true, alpha: true, depth: true });
 if (!gl) { document.getElementById('err').style.display = 'flex'; throw new Error('no webgl'); }
+gl.getExtension('OES_standard_derivatives');   // 第80轮：迷你地球纬线 fwidth 屏幕等宽所需
 const ctx2d = ov.getContext('2d');
 
 /* ---------------- 矩阵工具 ---------------- */
@@ -468,6 +488,12 @@ function mMul(a, b) {
     o[c * 4 + r] = s;
   }
   return o;
+}
+/* 旋转矩阵的逆 = 转置：把世界向量变换到物体局部坐标系（第81轮：两球昼夜相位一致性校验用） */
+function mTV(m, v) {
+  return [m[0] * v[0] + m[1] * v[1] + m[2] * v[2],
+          m[4] * v[0] + m[5] * v[1] + m[6] * v[2],
+          m[8] * v[0] + m[9] * v[1] + m[10] * v[2]];
 }
 function mPersp(fovy, aspect, near, far) {
   const f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far), o = new Float32Array(16);
@@ -487,6 +513,13 @@ function mLookAt(eye, c, up) {
 }
 function mRotY(a) { const c=Math.cos(a), s=Math.sin(a); return new Float32Array([c,0,-s,0, 0,1,0,0, s,0,c,0, 0,0,0,1]); }
 function mRotZ(a) { const c=Math.cos(a), s=Math.sin(a); return new Float32Array([c,s,0,0, -s,c,0,0, 0,0,1,0, 0,0,0,1]); }
+/* 正交投影：可视半高 hh（世界单位）→ NDC。迷你地球用（正投影使球轮廓为正圆、无透视变形） */
+function mOrtho(hh, aspect, near, far) {
+  const o = new Float32Array(16);
+  o[0] = 1 / (hh * aspect); o[5] = 1 / hh;
+  o[10] = -2 / (far - near); o[14] = -(far + near) / (far - near); o[15] = 1;
+  return o;
+}
 function sph(lat, lon, r) {
   const la = lat*Math.PI/180, lo = lon*Math.PI/180, c = Math.cos(la);
   return [r*c*Math.sin(lo), r*Math.sin(la), r*c*Math.cos(lo)];
@@ -530,9 +563,10 @@ void main(){
   vWP = wp.xyz;
   vN = normalize((uModel * vec4(aPos, 0.0)).xyz);
   gl_Position = uProj * uView * wp;
-}`, PRE + `
+}`, '#extension GL_OES_standard_derivatives : enable\n' + PRE + `
 uniform sampler2D uTex; uniform vec3 uSunDir; uniform vec3 uCamPos;
 uniform float uNightOn; uniform float uTwilight; uniform float uRefr;
+uniform float uLatOn; uniform float uLatPx;   // 五条纬线开关 / 迷你地球视半径（设备像素）
 uniform sampler2D uMask; uniform float uLandOn;
 varying vec2 vUV; varying vec3 vN; varying vec3 vWP;
 void main(){
@@ -554,6 +588,24 @@ void main(){
   vec3 V = normalize(uCamPos - vWP);
   float fres = pow(1.0 - max(dot(N, V), 0.0), 3.5);
   col += vec3(0.30, 0.55, 1.0) * fres * (0.10 + 0.45 * lit);
+  /* 五条纬线（第80轮，仅公转迷你地球开启）：赤道 / 南北回归线 ±23.44° / 南北极圈 ±66.56°。
+     配色（与底图昼夜两侧海蓝/陆色高区分度，按用户指定）：赤道红、回归线橙、极圈黄。
+     线宽用屏幕空间导数 fwidth(lat)（每像素纬度变化量）换算：半宽恒为 1.35 设备像素，
+     赤道、极区、临边任何位置粗细处处一致（替代旧 1/cz 解析补偿——它在极区把线放宽数倍）；
+     画在昼夜混合与大气边缘之后 → 夜半球侧同样鲜亮。 */
+  if (uLatOn > 0.5) {
+    float lat = (0.5 - vUV.y) * 180.0;                       // +90 北极 … −90 南极
+    float w = fwidth(lat) * 1.35;                            // 线半宽（度）≈ 恒定 1.35 设备像素
+    float mEq = abs(lat);
+    float mTr = min(abs(lat - 23.44), abs(lat + 23.44));
+    float mPc = min(abs(lat - 66.56), abs(lat + 66.56));
+    float aEq = 1.0 - smoothstep(w * 0.55, w, mEq);
+    float aTr = 1.0 - smoothstep(w * 0.55, w, mTr);
+    float aPc = 1.0 - smoothstep(w * 0.55, w, mPc);
+    col = mix(col, vec3(1.00, 0.16, 0.10), aEq * 0.95);      // 赤道：红
+    col = mix(col, vec3(1.00, 0.55, 0.05), aTr * 0.95);      // 回归线：橙
+    col = mix(col, vec3(1.00, 0.92, 0.00), aPc * 0.95);      // 极圈：黄
+  }
   gl_FragColor = vec4(col, 1.0);
 }`);
 
@@ -575,6 +627,20 @@ void main(){
   vec2 d = gl_PointCoord - vec2(0.5);
   float a = smoothstep(0.5, 0.05, length(d));
   gl_FragColor = vec4(1.0, 1.0, 1.0, a * vA);
+}`);
+
+/* 彩色柔点（公转示意图的太阳/光晕/轨道季节点）：与 pStar 同为屏幕空间圆点，
+   但带顶点颜色，且可直接给 NDC 坐标（uProj/uView 传单位阵）。 */
+const pDot = prog(`
+attribute vec3 aPos; attribute vec4 aCol; attribute float aSize;
+uniform mat4 uProj, uView;
+varying vec4 vCol;
+void main(){ vCol = aCol; gl_Position = uProj * uView * vec4(aPos, 1.0); gl_PointSize = aSize; }`, `
+precision mediump float; varying vec4 vCol;
+void main(){
+  vec2 d = gl_PointCoord - vec2(0.5);
+  float a = smoothstep(0.5, 0.06, length(d));
+  gl_FragColor = vec4(vCol.rgb, vCol.a * a);
 }`);
 
 const FLAT_VS = `
@@ -1440,6 +1506,7 @@ const loc = {
   sph: {
     proj: uS('uProj'), view: uS('uView'), model: uS('uModel'), tex: uS('uTex'),
     sun: uS('uSunDir'), cam: uS('uCamPos'), night: uS('uNightOn'), twi: uS('uTwilight'), refr: uS('uRefr'),
+    lat: uS('uLatOn'), latpx: uS('uLatPx'),
     mask: uS('uMask'), land: uS('uLandOn'),
     aPos: gl.getAttribLocation(pSphere, 'aPos'), aUV: gl.getAttribLocation(pSphere, 'aUV')
   },
@@ -1451,6 +1518,12 @@ const loc = {
     proj: uT('uProj'), view: uT('uView'),
     aPos: gl.getAttribLocation(pStar, 'aPos'), aSize: gl.getAttribLocation(pStar, 'aSize'), aA: gl.getAttribLocation(pStar, 'aA')
   }
+};
+const uD = U(pDot);
+const locDot = {
+  proj: uD('uProj'), view: uD('uView'),
+  aPos: gl.getAttribLocation(pDot, 'aPos'), aCol: gl.getAttribLocation(pDot, 'aCol'),
+  aSize: gl.getAttribLocation(pDot, 'aSize')
 };
 
 /* ---------------- 渲染 ---------------- */
@@ -1472,7 +1545,12 @@ function render() {
     ];
     camEye = eye;
     projMat = mPersp(35 * Math.PI / 180, W / H, 0.1, 200);
-    viewMat = mLookAt(eye, [0, 0, 0], [0, 1, 0]);
+    /* 俯视图（第75轮改）：up 取世界 ±z，使太阳 ŝ=[1,0,0] 在屏幕上严格指向正右方——
+       北俯视 up=−z → 右向 r̂=(cosδ,−sinδ,0)，dot(ŝ,r̂)=cosδ>0 恒成立
+       （δ∈[−23.44°,23.44°] 时 0.917≤dot≤1），dot(ŝ,û)≈0（≤0.004，纯水平）；
+       南俯视 up=+z 同理。眼向量不变，极点仍居中，只是滚转角与前版相差 180°。 */
+    viewMat = mLookAt(eye, [0, 0, 0],
+      state.polarView ? [0, 0, state.polarView === 'north' ? -1 : 1] : [0, 1, 0]);
     vpMat = mMul(projMat, viewMat);
     const d = state.decl * Math.PI / 180, r = state.rotDeg * Math.PI / 180;
     modelMat = mMul(mRotZ(-d), mRotY(r));
@@ -1529,6 +1607,7 @@ function render() {
     gl.uniform1f(loc.sph.night, state.dayNight ? 1 : 0);
     gl.uniform1f(loc.sph.twi, twi);
     gl.uniform1f(loc.sph.refr, state.refr ? 1 : 0);
+    gl.uniform1f(loc.sph.lat, 0);          // 主 3D 地球不画纬线（仅公转迷你地球）
     gl.bindBuffer(gl.ARRAY_BUFFER, sphVBO);
     gl.enableVertexAttribArray(loc.sph.aPos); gl.vertexAttribPointer(loc.sph.aPos, 3, gl.FLOAT, false, 0, 0);
     gl.bindBuffer(gl.ARRAY_BUFFER, sphUVBO);
@@ -1629,6 +1708,9 @@ function render() {
       gl.disableVertexAttribArray(loc.line.aCol);
     }
     gl.depthMask(true);
+
+    // 右下角：地球绕日公转示意图窗口（屏幕空间叠加；最后绘制 → 覆盖在场景之上）
+    if (state.orbitOn && !state.flatOpen && orbSlide < 0.999) drawOrbitWindow(twi);
   }
 }
 
@@ -1760,6 +1842,8 @@ function drawOverlay() {
   }
   // 3D 球面经纬度标注
   if (state.labels) drawGlobeLabels(c, fs);
+  // 公转示意图窗口的文字：面板/轨道/太阳/迷你地球由 WebGL 绘制，文字叠加其上
+  if (state.orbitOn && !state.flatOpen && state.view === 'globe') drawOrbText(c, fs);
 }
 
 function drawTag(c, fs, x, y, text, align, color) {
@@ -1771,12 +1855,17 @@ function drawTag(c, fs, x, y, text, align, color) {
 }
 /* 平面图专用：直接给设备像素字号，描边光晕按字号比例缩放，
    使文字在地图被缩放（窗口放大/缩小）时始终保持清晰的衬底与合适的粗细 */
-function drawTagF(c, pxSize, x, y, text, align, color) {
+function drawTagF(c, pxSize, x, y, text, align, color, onLight) {
   const p = Math.max(4, pxSize);
   c.font = '700 ' + p.toFixed(1) + 'px "PingFang SC","Microsoft YaHei",sans-serif';
   c.textAlign = align || 'left'; c.textBaseline = 'middle';
-  c.lineWidth = Math.max(2, p * 0.30); c.lineJoin = 'round';
-  c.strokeStyle = 'rgba(6,12,26,0.9)'; c.strokeText(text, x, y);
+  if (onLight) {   // 白底面板：深色粗描边会糊住文字 → 改用细白描边（仅用于压住底下图形）
+    c.lineWidth = Math.max(1.2, p * 0.14); c.lineJoin = 'round';
+    c.strokeStyle = 'rgba(255,255,255,0.92)'; c.strokeText(text, x, y);
+  } else {
+    c.lineWidth = Math.max(2, p * 0.30); c.lineJoin = 'round';
+    c.strokeStyle = 'rgba(6,12,26,0.9)'; c.strokeText(text, x, y);
+  }
   c.fillStyle = color || 'rgba(235,242,252,0.96)'; c.fillText(text, x, y);
 }
 function modelPoint(p) {   // 地球坐标 → 世界坐标
@@ -2591,6 +2680,7 @@ function setFlat(open) {
   mapwin.classList.toggle('show', state.flatOpen);
   document.body.classList.toggle('flat', state.flatOpen);
   $('viewBtns').style.display = state.flatOpen ? 'none' : '';   // 展开时整组隐藏（由窗口标题栏的“收起”关闭）
+  syncOrbClose();                                                // 公转示意图窗口同理（✕ 会盖住标题栏）
   document.querySelectorAll('#segView button').forEach(b =>
     b.classList.toggle('on', (b.dataset.v === 'flat') === state.flatOpen));
   if (state.flatOpen) { resizeFlat(); updateFlatSub(); }
@@ -2652,12 +2742,343 @@ function updateLocInfo() {
   $('locNote').textContent = note;
 }
 
+/* ================= 地球绕日公转示意图（3D 区右下角浮动窗口） =================
+   太阳居中，地球沿斜视椭圆轨道运行；公转位置由太阳视黄经 λ 决定：α = 225° − λ。
+     λ=180°（秋分）→ 地球在轨道正前方（图幅下方离观察者最近），地轴垂直于日地连线
+     λ=0°（春分）→ 地球在轨道正后方（图幅上方），全球昼夜等长
+     λ=90°（夏至）→ 地球在图幅左侧，北极倾向太阳（北半球昼长夜短、北极极昼）
+     λ=270°（冬至）→ 地球在右侧，北极背向太阳
+   地轴在图中固定倾斜 ε = 23.44°（黄赤交角），故被照亮的一侧恒朝向太阳，
+   直射点纬度 δ = asin(sinε · sinλ) 与左侧面板读数一致：面板 8.5°N ⇒ 图中地球
+   被照亮的圆心正是 8.5°N 那条纬线。
+   坐标系：位置映射 α = 225° − λ 等价于把「基准系（α=270°−λ、地轴倾斜向 +x）」
+   整体绕 y 轴旋转 ORB_AZ=45°（旋转保持所有点积 → δ 公式不变，秋分恰转到正前方）。
+   因此地轴向量和迷你地球模型矩阵必须做同一旋转（见 ORB_AXIS_W 与 modelM），
+   否则图中受光纬度与面板读数不符。
+   迷你地球 = 缩小版 3D 地球：复用同一套球体着色器（地球贴图 + 海陆遮罩 + 昼夜半球
+   光照 + 大气抬升）与地轴几何，换成小视口 + 正交投影 + 独立的日地几何。
+   视点仰角取 25°（第79轮：按需求自 45° 下调 20°）：秋分在正前方时日地方向与视向
+   夹角 = 25°（dot = −cos 仰角 ≈ −0.906），迷你地球看到的以夜半球为主、昼侧只剩
+   一弯窄亮边——这是该视角下的真实相位；春分在正后方时相反（以昼半球为主）。
+   二至在左右两侧，晨昏线始终清晰。窗口高度按更低仰角下轨道纵半轴（sin25°·R）
+   与标签越出量重新取值。
+   显隐：窗口右上角 ≡（三条短横线）收起 → 窗口贴右边滑出，右缘留「公转」标签可展开；
+   平面地图展开时一并隐藏。 */
+const ORB_W = 248, ORB_H = 180, ORB_M = 16;     // 窗口宽高 / 距舞台右下角边距（CSS px）
+const ORB_TITLE_H = 26, ORB_PADB = 8;           // 标题条高度 / 内容区下边距
+const ORB_ELEV = 25 * Math.PI / 180;            // 视点仰角（斜视黄道面 → 轨道呈椭圆；第79轮 45°→25°）
+const ORB_SIN = Math.sin(ORB_ELEV), ORB_COS = Math.cos(ORB_ELEV);
+const ORB_AZ = 45 * Math.PI / 180;              // 视点方位：避开二至二分之位 → 任何季节地球都同时露出昼夜两侧
+const ORB_R = 74;                               // 轨道横向半轴（CSS px）
+const ORB_ER = 19;                              // 迷你地球视半径（CSS px）
+const ORB_AXL = 1.16;                           // 地轴半长（与 3D 区地轴一致）
+const ORB_RAD = Math.PI / 180;
+const ORB_EP = OBLIQUITY * ORB_RAD;             // 黄赤交角（弧度）
+/* 视向基（黄道系）：v = 视向单位向量，r / u = 屏幕右 / 上方向。
+   正交投影 world → 屏幕 = (cx + K·p·r, cy − K·p·u)；迷你地球相机用同一组基，
+   因此示意图中画出的轨道、地轴方向与 WebGL 渲染的迷你地球完全自洽。 */
+const ORB_VIEW = (() => {
+  const v = [Math.sin(ORB_AZ) * ORB_COS, ORB_SIN, Math.cos(ORB_AZ) * ORB_COS];
+  const lv = Math.hypot(v[0], v[1], v[2]) || 1; v[0] /= lv; v[1] /= lv; v[2] /= lv;
+  const r = [v[2], 0, -v[0]], lr = Math.hypot(r[0], r[1], r[2]) || 1;
+  r[0] /= lr; r[1] /= lr; r[2] /= lr;
+  return { v, r, u: [v[1] * r[2] - v[2] * r[1], v[2] * r[0] - v[0] * r[2], v[0] * r[1] - v[1] * r[0]] };
+})();
+function orbProj(p, K, cx, cy) {
+  const r = ORB_VIEW.r, u = ORB_VIEW.u;
+  return { x: cx + K * (p[0] * r[0] + p[1] * r[1] + p[2] * r[2]),
+           y: cy - K * (p[0] * u[0] + p[1] * u[1] + p[2] * u[2]) };
+}
+const orbEarthPos = lam => {                    // 太阳视黄经 → 地球在黄道面上的单位位置
+  const a = (225 - lam) * ORB_RAD;              // λ=180°（秋分）→ α=45° = 视向水平分量方向 = 轨道正前方
+  return [Math.cos(a), 0, Math.sin(a)];
+};
+const ORB_CAZ = Math.cos(ORB_AZ), ORB_SAZ = Math.sin(ORB_AZ);
+/* 地轴方向 = R_y(ORB_AZ)·[sinε, cosε, 0]：与位置映射 α=225°−λ（同一绕 y 旋转）配套，
+   保证图中受光纬度 δ = asin(sinε·sinλ) 与面板读数严格一致——
+   夏至（λ=90°）北极倾向太阳、冬至背向太阳、二分（λ=0°/180°）地轴垂直于日地连线 */
+const ORB_AXIS_W = [ORB_CAZ * Math.sin(ORB_EP), Math.cos(ORB_EP), -ORB_SAZ * Math.sin(ORB_EP)];
+/* 公转相位补偿（第81轮）——让迷你地球的自转与 3D 主图同步（昼夜半球一致）。
+   主球约定：局部太阳方向 = Mᵀ·SUN，M = R_z(−δ)·R_y(r) → 复平面 (x+iz) = cosδ·e^{i r}，
+   即"同一自转角 r 恒对应同一条受晒经线"，与季节无关（太阳时 ↔ 自转角）。
+   迷你球原先只用 R_y(r)：其局部太阳 (A+iC)·e^{i r}（A=cosε·sinλ，C=cosλ）与主球相差
+   固定相位 atan2(C,A) → 春秋分偏差 90°、冬至 133°（夏至恰好 0°，故此前未暴露）；
+   补上 Δ = −atan2(cosλ, cosε·sinλ) 后 e^{iΔ}=(A−iC)/cosδ 抵消该相位，两球逐点一致。
+   注意：绕地轴（局部 Y）旋转不改变地轴方向 → 第77轮的 δ=asin(sinε·sinλ) 与轴线投影不变。 */
+const orbSpinPhase = lam => -Math.atan2(Math.cos(lam * ORB_RAD), Math.cos(ORB_EP) * Math.sin(lam * ORB_RAD));
+const ORB_SLIDE_X = ORB_W + ORB_M + 6;          // 收起时窗口向右滑出的距离（完全离场）
+let orbSlide = state.orbHide ? 1 : 0;           // 0=展开 → 1=贴右边收起（帧循环里平滑过渡；初始跟随默认隐藏态，避免首帧滑动）
+
+function orbRect() {                            // 面板矩形（CSS px，舞台左上为原点、y 向下）
+  const x0 = W / dpr - (ORB_W + ORB_M), y0 = H / dpr - (ORB_H + ORB_M);
+  return { x0, y0, x1: x0 + ORB_W, y1: y0 + ORB_H, w: ORB_W, h: ORB_H,
+           cx: x0 + ORB_W / 2, cy: y0 + ORB_TITLE_H + (ORB_H - ORB_TITLE_H - ORB_PADB) / 2 };
+}
+/* 公转位置用的太阳视黄经 λ（°）：优先级 = 日期锁存（二至二分按钮/日期选择器/同步当前）
+   > 滑杆方向覆盖 orbLamOverride（拖直射点滑杆时按方向选分支：向右=冬至经春分到夏至，
+   向左=夏至经秋分回冬至）> 纬度反解约定（δ≥0 取春分→夏至段，δ<0 取秋分→冬至段），
+   从而保证图中直射点纬度与面板读数一致。 */
+let orbLamOverride = null;      // 滑杆拖动写入的 λ（°），日期锁存优先于它
+function orbLambda() {
+  if (dateLock) {
+    const n = bjNoon(dateLock.y, ymdToDoy(dateLock.y, dateLock.m, dateLock.d));
+    const l = sunLambda(n) % 360;
+    return l < 0 ? l + 360 : l;
+  }
+  if (orbLamOverride != null) return orbLamOverride;
+  const k = Math.max(-1, Math.min(1, Math.sin(state.decl * ORB_RAD) / SINE));
+  const a = Math.asin(k) / ORB_RAD;             // 升交解 ∈ (−23.44°, 90°)
+  return state.decl >= 0 ? a : 180 - a;
+}
+let orbLast = null;
+function orbGeom() {
+  const R = orbRect();
+  const lam = orbLambda();
+  const E = orbEarthPos(lam);                   // 地球在黄道面上的单位位置（λ=270° 冬至 → +x）
+  const earth = orbProj(E, ORB_R, R.cx, R.cy);
+  const ax = orbProj(ORB_AXIS_W, ORB_ER, 0, 0); // 地轴屏幕分量（1 世界单位 ↔ ORB_ER px）
+  const g = { R, lam, E, earth, axX: ax.x, axY: ax.y,
+    sun3: [-E[0], 0, -E[2]],                    // 地球 → 太阳方向（黄道系，供球体着色器）
+    decl: Math.asin(Math.max(-1, Math.min(1, Math.sin(ORB_EP) * Math.sin(lam * ORB_RAD)))) / ORB_RAD };
+  orbLast = g;
+  return g;
+}
+/* 窗口静态几何（面板、边框、轨道、柔点）按画布尺寸缓存；射线每帧重建 */
+let orbKey = '', orbB = null;
+const orbRayPos = gl.createBuffer(), orbRayCol = gl.createBuffer();
+function orbBuild(R) {
+  const key = W + ',' + H + ',' + dpr;
+  if (orbKey === key && orbB) return orbB;
+  if (orbB) for (const k of ['fanPos', 'fanCol', 'bdPos', 'bdCol', 'rgPos', 'rgCol', 'dotPos', 'dotCol', 'dotSize'])
+    if (orbB[k]) gl.deleteBuffer(orbB[k]);
+  orbKey = key;
+  const nx = x => (x * dpr / W) * 2 - 1;
+  const ny = y => ((H / dpr - y) * dpr / H) * 2 - 1;
+  const mk = list => {
+    const b = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, b);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(list), gl.STATIC_DRAW);
+    return b;
+  };
+  // 1) 面板：圆角矩形（中心扇形填充 + 折线边框，两遍微移加粗）
+  const rr = 12, seg = 6, path = [];
+  for (const [ccx, ccy, a0, a1] of [[R.x0 + rr, R.y0 + rr, Math.PI, 1.5 * Math.PI],
+                                    [R.x1 - rr, R.y0 + rr, 1.5 * Math.PI, 2 * Math.PI],
+                                    [R.x1 - rr, R.y1 - rr, 0, 0.5 * Math.PI],
+                                    [R.x0 + rr, R.y1 - rr, 0.5 * Math.PI, Math.PI]])
+    for (let i = 0; i <= seg; i++) {
+      const a = a0 + (a1 - a0) * i / seg;
+      path.push([ccx + rr * Math.cos(a), ccy + rr * Math.sin(a)]);
+    }
+  const fanP = [], fanC = [], bdP = [], bdC = [];
+  const FAC = [1, 1, 1, 0.985], BDC = [0.55, 0.62, 0.72, 0.60];   // 白色面板 + 灰蓝细边框
+  const pt = (arr, x, y) => arr.push(nx(x), ny(y), 0);
+  pt(fanP, R.cx, R.cy); for (let i = 0; i < 4; i++) fanC.push(...FAC);
+  for (const [x, y] of path) { pt(fanP, x, y); fanC.push(...FAC); }
+  pt(fanP, path[0][0], path[0][1]); fanC.push(...FAC);
+  for (const [x, y] of path) { pt(bdP, x, y); bdC.push(...BDC); }
+  // 2) 轨道椭圆（沿运行方向采样后投影 → 任何视向下都是真实投影曲线，地球恒在线上）
+  const rgP = [], rgC = [], NSEG = 96;
+  for (let i = 0; i < NSEG; i++) {
+    const a = i / NSEG * Math.PI * 2;
+    const P = orbProj([Math.cos(a), 0, Math.sin(a)], ORB_R, R.cx, R.cy);
+    pt(rgP, P.x, P.y);
+    rgC.push(0.42, 0.52, 0.68, 0.55);
+  }
+  // 3) 柔点：太阳光晕(0) / 太阳本体(1) / 四个季节点(2..5)，同缓冲按偏移分段绘制
+  const dotP = [], dotC = [], dotS = [];
+  const addDot = (x, y, r, col) => { pt(dotP, x, y); dotC.push(...col); dotS.push(r * dpr); };
+  addDot(R.cx, R.cy, ORB_ER * 2.35, [1.0, 0.72, 0.25, 0.40]);
+  addDot(R.cx, R.cy, ORB_ER * 0.95, [1.00, 0.76, 0.18, 1.0]);
+  for (const lam of [0, 90, 180, 270]) {
+    const P = orbProj(orbEarthPos(lam), ORB_R, R.cx, R.cy);
+    addDot(P.x, P.y, 2.6, [0.42, 0.52, 0.68, 0.9]);
+  }
+  orbB = { nx, ny,
+    fanPos: mk(fanP), fanCol: mk(fanC), fanN: fanP.length / 3,
+    bdPos: mk(bdP), bdCol: mk(bdC), bdN: bdP.length / 3,
+    rgPos: mk(rgP), rgCol: mk(rgC), rgN: rgP.length / 3,
+    dotPos: mk(dotP), dotCol: mk(dotC), dotSize: mk(dotS), dotN: dotP.length / 3 };
+  return orbB;
+}
+function drawOrbitWindow(twi) {
+  if (orbSlide >= 0.999) { window.__orb = null; return; }
+  const dx = orbSlide * ORB_SLIDE_X;            // 收起滑动量（CSS px，向右）
+  const g = orbGeom(), R = g.R, B = orbBuild(R), nx = B.nx, ny = B.ny;
+  const px = Math.round((R.x0 + dx) * dpr), pw = Math.round(R.w * dpr);
+  const py = Math.round((H / dpr - R.y1) * dpr), ph = Math.round(R.h * dpr);
+  gl.enable(gl.SCISSOR_TEST);
+  gl.scissor(px, py, pw, ph);
+  gl.depthMask(true);
+  gl.clear(gl.DEPTH_BUFFER_BIT);      // 面板区深度清零（白色面板近乎不透明）
+  gl.disable(gl.DEPTH_TEST); gl.depthMask(false);
+  const id = mIdent();
+  /* 整窗平移（收起动画）：缓存几何按基准矩形构建，用平移矩阵搬到滑动位置 */
+  const orbTr = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2 * dx * dpr / W, 0, 0, 1];
+  const line = (bp, bc) => {
+    gl.bindBuffer(gl.ARRAY_BUFFER, bp);
+    gl.enableVertexAttribArray(loc.line.aPos);
+    gl.vertexAttribPointer(loc.line.aPos, 3, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bc);
+    gl.enableVertexAttribArray(loc.line.aCol);
+    gl.vertexAttribPointer(loc.line.aCol, 4, gl.FLOAT, false, 0, 0);
+  };
+  const dot = (off, n) => {
+    gl.bindBuffer(gl.ARRAY_BUFFER, B.dotPos);
+    gl.enableVertexAttribArray(locDot.aPos);
+    gl.vertexAttribPointer(locDot.aPos, 3, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, B.dotCol);
+    gl.enableVertexAttribArray(locDot.aCol);
+    gl.vertexAttribPointer(locDot.aCol, 4, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, B.dotSize);
+    gl.enableVertexAttribArray(locDot.aSize);
+    gl.vertexAttribPointer(locDot.aSize, 1, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.POINTS, off, n);
+  };
+  const jit = [[0, 0], [2 * 0.7 / W, 0], [0, 2 * 0.7 / H]];   // 半像素级微移 → 线宽约 1.5 设备像素
+  gl.useProgram(pLine);
+  gl.uniformMatrix4fv(loc.line.proj, false, id);
+  gl.uniformMatrix4fv(loc.line.view, false, id);
+  gl.uniformMatrix4fv(loc.line.model, false, orbTr);
+  gl.uniform2f(loc.line.jit, 0, 0);
+  line(B.fanPos, B.fanCol); gl.drawArrays(gl.TRIANGLE_FAN, 0, B.fanN);        // 面板背景
+  line(B.bdPos, B.bdCol);
+  for (const o of jit) { gl.uniform2f(loc.line.jit, o[0], o[1]); gl.drawArrays(gl.LINE_LOOP, 0, B.bdN); }
+  gl.useProgram(pDot);                                                        // 太阳光晕（在轨道之下）
+  gl.uniformMatrix4fv(locDot.proj, false, id);
+  gl.uniformMatrix4fv(locDot.view, false, orbTr);
+  dot(0, 1);
+  gl.useProgram(pLine);                                                       // 轨道
+  gl.uniform2f(loc.line.jit, 0, 0);
+  line(B.rgPos, B.rgCol);
+  for (const o of jit) { gl.uniform2f(loc.line.jit, o[0], o[1]); gl.drawArrays(gl.LINE_LOOP, 0, B.rgN); }
+  gl.uniform2f(loc.line.jit, 0, 0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, orbRayPos);                                  // 日地连线（阳光方向）
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([nx(R.cx), ny(R.cy), 0,
+    nx(g.earth.x), ny(g.earth.y), 0]), gl.DYNAMIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, orbRayCol);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0.93, 0.55, 0.10, 0.50, 0.93, 0.55, 0.10, 0.50]), gl.DYNAMIC_DRAW);
+  line(orbRayPos, orbRayCol); gl.drawArrays(gl.LINES, 0, 2);
+  gl.useProgram(pDot);                                                        // 太阳本体 + 季节点
+  dot(1, B.dotN - 1);
+  // ---- 迷你地球：正交投影 + 与示意图同一视向（屏幕上的地轴方向因此自洽）----
+  const side = Math.max(8, Math.round(2 * 1.35 * ORB_ER * dpr));
+  const vpX = Math.round((g.earth.x + dx) * dpr - side / 2);
+  const vpY = Math.round((H / dpr - g.earth.y) * dpr - side / 2);
+  gl.viewport(vpX, vpY, side, side);
+  gl.enable(gl.DEPTH_TEST); gl.depthMask(true);
+  const projM = mOrtho(1.35, 1, 5, 11);
+  const eyeV = [ORB_VIEW.v[0] * 8, ORB_VIEW.v[1] * 8, ORB_VIEW.v[2] * 8];
+  const viewM = mLookAt(eyeV, [0, 0, 0], [0, 1, 0]);
+  /* 模型变换 = R_y(ORB_AZ) · R_z(−ε) · R_y(自转 + 公转相位补偿)：与 ORB_AXIS_W 同一坐标系旋转，
+     使渲染出的地轴方向与示意图 2D 轴线（orbProj(ORB_AXIS_W)）严格一致；
+     orbSpinPhase(λ) 抵消轨道位置带来的相位差 → 迷你地球受晒经线与 3D 主图完全同步（第81轮） */
+  const modelM = mMul(mRotY(ORB_AZ), mMul(mRotZ(-ORB_EP), mRotY(state.rotDeg * ORB_RAD + orbSpinPhase(g.lam))));
+  gl.useProgram(pSphere);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, earthTex); gl.uniform1i(loc.sph.tex, 0);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, landMaskTex); gl.uniform1i(loc.sph.mask, 1);
+  gl.uniform1f(loc.sph.land, state.coast ? 1 : 0);
+  gl.uniformMatrix4fv(loc.sph.proj, false, projM);
+  gl.uniformMatrix4fv(loc.sph.view, false, viewM);
+  gl.uniformMatrix4fv(loc.sph.model, false, modelM);
+  gl.uniform3fv(loc.sph.sun, new Float32Array(g.sun3));
+  gl.uniform3fv(loc.sph.cam, new Float32Array(eyeV));
+  gl.uniform1f(loc.sph.night, state.dayNight ? 1 : 0);
+  gl.uniform1f(loc.sph.twi, twi);
+  gl.uniform1f(loc.sph.refr, state.refr ? 1 : 0);
+  gl.uniform1f(loc.sph.lat, 1);            // 迷你地球：显示赤道/回归线/极圈五条纬线
+  gl.uniform1f(loc.sph.latpx, ORB_ER * dpr);
+  gl.bindBuffer(gl.ARRAY_BUFFER, sphVBO);
+  gl.enableVertexAttribArray(loc.sph.aPos); gl.vertexAttribPointer(loc.sph.aPos, 3, gl.FLOAT, false, 0, 0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, sphUVBO);
+  gl.enableVertexAttribArray(loc.sph.aUV); gl.vertexAttribPointer(loc.sph.aUV, 2, gl.FLOAT, false, 0, 0);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphIBO);
+  gl.drawElements(gl.TRIANGLES, SPH_N, gl.UNSIGNED_SHORT, 0);
+  gl.disableVertexAttribArray(loc.sph.aUV);
+  /* 地轴改由 2D 覆盖层绘制（drawOrbText）：3D 轴杆在 45° 仰角下透视缩短、
+     端点缩进球面轮廓内几乎不可见；覆盖层深色轴线明显得多。
+     只画球体轮廓外面的两段——地球内部不显示（球体遮挡，与 3D 主视图一致） */
+  gl.viewport(0, 0, W, H);
+  gl.disable(gl.SCISSOR_TEST);
+  gl.disableVertexAttribArray(loc.line.aCol);
+  gl.depthMask(true); gl.enable(gl.DEPTH_TEST);
+  window.__orb = { rect: [R.x0, R.y0, R.w, R.h], cx: R.cx, cy: R.cy, sun: [R.cx, R.cy],
+    earth: [g.earth.x, g.earth.y], er: ORB_ER, rorb: ORB_R, lam: g.lam, decl: g.decl,
+    axis: [g.axX, g.axY], elev: ORB_ELEV * 180 / Math.PI, titleH: ORB_TITLE_H,
+    view: [ORB_VIEW.v[0], ORB_VIEW.v[1], ORB_VIEW.v[2]], E: [g.E[0], g.E[1], g.E[2]], dx,
+    /* 第81轮测试钩子：两球"局部太阳方向"（Mᵀ·sun）应一致 → 昼夜半球图案一致；
+       以及迷你球的正交相机矩阵与视口，供把局部点投影到屏幕做像素校验 */
+    sunLocal: mTV(modelMat, SUN), miniSunLocal: mTV(modelM, g.sun3),
+    miniM: Array.from(modelM), miniV: Array.from(viewM), miniP: Array.from(projM),
+    miniVP: [vpX, vpY, side], spinPhase: orbSpinPhase(g.lam) * 180 / Math.PI };
+}
+/* 窗口文字（画在 2D 覆盖层上，位于 WebGL 之上）；收起滑动时随窗口整体平移 */
+function drawOrbText(c, fs) {
+  const g = orbLast; if (!g) return;
+  if (orbSlide >= 0.999) return;
+  const R = g.R, T = x => x * dpr;
+  c.save();
+  c.translate(orbSlide * ORB_SLIDE_X * dpr, 0);
+  drawTagF(c, 12.5 * dpr, T(R.x0 + 11), T(R.y0 + 13), '地球绕日公转', 'left', 'rgba(31,51,77,0.98)', true);
+  /* 第80轮：按需求不再在公转窗口显示"直射点 ××°"文字（数据仍经 g.decl 用于轨道对应） */
+  const NM = { 0: '春分', 90: '夏至', 180: '秋分', 270: '冬至' };
+  for (const lam of [0, 90, 180, 270]) {
+    const P = orbProj(orbEarthPos(lam), ORB_R, R.cx, R.cy);
+    let dx = P.x - R.cx, dy = P.y - R.cy;                   // 标签沿径向外移：越过轨道点与迷你地球
+    const dl = Math.hypot(dx, dy) || 1; dx /= dl; dy /= dl;
+    const off = ORB_ER + 7;
+    const cur = Math.abs(norm180(g.lam - lam)) < 4;         // 当前所处季节高亮
+    const al = Math.abs(dx) < 0.35 ? 'center' : (dx > 0 ? 'left' : 'right');
+    let lx = P.x + dx * off, ly = P.y + dy * off;
+    if (Math.abs(dx) < 0.35 && cur)                         // 二分位：地球恰在标签旁，N/S 轴标
+      lx += dy > 0 ? 18 : -18;                              // （前位 S 在左→右移；后位 N 在右→左移）
+    drawTagF(c, 10.5 * dpr, T(lx), T(ly), NM[lam], al,
+      cur ? 'rgba(180,83,9,0.98)' : 'rgba(90,107,128,0.95)', true);
+  }
+  /* 「太阳」文字标注已按需求移除（第79轮）：太阳本体由中心光晕 + 暖橙圆点呈现，
+     语义不依赖文字；标签避让逻辑（春分位地球遮挡）随之删除。 */
+  if (state.axis) {                                         // 地轴：只画球体外面两段（球内被地球挡住，与 3D 主视图一致）
+    const al = Math.hypot(g.axX, g.axY) || 1;
+    const ux = g.axX / al, uy = g.axY / al;                 // 轴在屏幕上的单位方向（北端为正）
+    const HALF = ORB_ER * 1.32;                             // 轴线半长（px），明显伸出球体轮廓
+    const R0 = ORB_ER + 1.2;                                // 内端起点：球体轮廓外 1.2px（轴线过圆心 → 恰在 r=ORB_ER 处穿出轮廓）
+    const px = -uy, py = ux;                                // 轴的法向（N 标注向该侧偏移，避开季节标签）
+    c.strokeStyle = 'rgba(29,58,95,0.92)';
+    c.lineWidth = 2.1 * dpr; c.lineCap = 'round';
+    c.beginPath();
+    c.moveTo(T(g.earth.x + ux * R0), T(g.earth.y + uy * R0));
+    c.lineTo(T(g.earth.x + ux * HALF), T(g.earth.y + uy * HALF));
+    c.moveTo(T(g.earth.x - ux * R0), T(g.earth.y - uy * R0));
+    c.lineTo(T(g.earth.x - ux * HALF), T(g.earth.y - uy * HALF));
+    c.stroke();
+    drawTagF(c, 10.5 * dpr, T(g.earth.x + ux * HALF + px * 10), T(g.earth.y + uy * HALF + py * 10), 'N', 'center', 'rgba(180,83,9,0.98)', true);
+    drawTagF(c, 10.5 * dpr, T(g.earth.x - ux * HALF - px * 10), T(g.earth.y - uy * HALF - py * 10), 'S', 'center', 'rgba(180,83,9,0.90)', true);
+  }
+  c.restore();
+}
+/* 窗口显隐：≡ 收起（贴右边滑出） / 右缘「公转」标签展开；平面地图展开时一并隐藏 */
+const orbClose = $('orbClose'), orbTab = $('orbTab');
+orbTab.style.bottom = Math.round(ORB_M + ORB_H * 0.5 - 24) + 'px';
+function syncOrbClose() {
+  const show = state.orbitOn && !state.flatOpen;
+  orbClose.style.right = (ORB_M + 5) + 'px';
+  orbClose.style.bottom = (ORB_M + ORB_H - 4 - 20) + 'px';
+  orbClose.classList.toggle('hide', !show || state.orbHide);
+  orbTab.classList.toggle('hide', !show || !state.orbHide);
+}
+orbClose.addEventListener('click', () => { state.orbHide = true; syncOrbClose(); });
+orbTab.addEventListener('click', () => { state.orbHide = false; syncOrbClose(); });
+syncOrbClose();
+
 /* ---------------- 主循环 ---------------- */
 let lastT = 0;
 function frame(t) {
   const dt = Math.min(0.05, (t - lastT) / 1000 || 0);
   lastT = t;
   if (state.spinning) state.rotDeg += dt * ROT_RATE * state.speed;
+  const orbTarget = state.orbHide ? 1 : 0;                    // 公转窗口贴右边收起动画
+  orbSlide += (orbTarget - orbSlide) * Math.min(1, dt * 9);
+  if (Math.abs(orbSlide - orbTarget) < 0.012) orbSlide = orbTarget;
   updateTerminator();
   if (state.hour0) updateHour0Line();
   render();
@@ -2666,6 +3087,7 @@ function frame(t) {
     try { drawFlat(); drawFlatOverlay(); }
     catch (e) { if (!window.__flatErr) window.__flatErr = (e.stack || e.message).slice(0, 300); }
   }
+  if (!(state.orbitOn && !state.flatOpen && state.view === 'globe') || orbSlide >= 0.999) window.__orb = null;
   updateHUD(t);
   updateTimeReadouts();
   updateLocInfo();
@@ -2796,6 +3218,7 @@ function applyDateSelects() {             // 日期选择器 → 直射点纬度
   const y = +selYear.value, m = +selMon.value;
   fillDaySelects(y, m);
   dateLock = { y, m, d: +selDay.value };  // 锁存用户选定日期
+  orbLamOverride = null;                  // 日期驱动 → 清除滑杆方向 λ 覆盖
   syncDecl(sunDeclAt(bjNoon(y, ymdToDoy(y, m, +selDay.value))));
   document.querySelectorAll('#chipsSeason button.on').forEach(x => x.classList.remove('on'));
   dateSyncing = false;
@@ -2812,6 +3235,7 @@ function syncDateToNow() {               // 本机当前日期（按北京时间
   const bj = new Date(Date.now() + 8 * 3600 * 1000);   // 取东八区日历日期
   const y = bj.getUTCFullYear(), m = bj.getUTCMonth() + 1, d = bj.getUTCDate();
   dateLock = { y, m, d };                // 锁存当日日期（至点前后由纬度反解日期天然病态）
+  orbLamOverride = null;                 // 日期驱动 → 清除滑杆方向 λ 覆盖
   syncDecl(sunDeclAt(bjNoon(y, ymdToDoy(y, m, d))));   // → 直射点纬度，并同步日期选择器
   document.querySelectorAll('#chipsSeason button.on').forEach(x => x.classList.remove('on'));
 }
@@ -2839,16 +3263,27 @@ $('ckSunBeam').addEventListener('change', e => { state.sunBeam = e.target.checke
 $('ckAxis').addEventListener('change', e => state.axis = e.target.checked);
 
 const rgDecl = $('rgDecl');
+let orbPrevDecl = null;                   // 滑杆方向基准（上一次直射点值；非滑杆来源时重置）
 function syncDecl(v, fromSlider) {
   state.decl = +v;
-  if (!fromSlider) rgDecl.value = v;
+  if (!fromSlider) { rgDecl.value = v; orbPrevDecl = +v; }
   $('declVal').textContent = fmtLatDMS(state.decl);
   $('seasonTag').textContent = seasonName(state.decl);
   syncDateSelects();                      // 直射点变化 → 日期选择器同步（当年准确日期）
 }
 rgDecl.addEventListener('input', e => {
   dateLock = null;                        // decl 驱动 → 清除日期锁存
-  syncDecl(e.target.value, true);
+  /* 滑杆方向 → 公转 λ 分支：向右滑 = 冬至(λ=270°) 经春分(0°) 转到夏至(90°)；
+     向左滑 = 夏至(90°) 经秋分(180°) 转回冬至(270°)。两条分支在 δ=±ε 端点处重合，
+     中间同一直射点纬度对应两个 λ（去程过春分、回程过秋分），轨道走不同半圈。 */
+  const v = +e.target.value;
+  const prev = orbPrevDecl === null ? v : orbPrevDecl;
+  const dir = v > prev ? 1 : (v < prev ? -1 : 0);
+  orbPrevDecl = v;
+  const k = Math.max(-1, Math.min(1, Math.sin(v * ORB_RAD) / SINE));
+  const a = Math.asin(k) / ORB_RAD;       // asin 解 ∈ [−90°, 90°]
+  orbLamOverride = dir < 0 ? 180 - a : (a < 0 ? a + 360 : a);
+  syncDecl(v, true);
   // 手动拖动直射点滑块 → 不再对应任何季节按钮，取消高亮
   document.querySelectorAll('#chipsSeason button.on').forEach(x => x.classList.remove('on'));
 });
@@ -2860,9 +3295,11 @@ $('chipsSeason').addEventListener('click', e => {
       const y = +selYear.value || CUR_YEAR;
       const dt = eventDate(+b.dataset.lam, y);
       dateLock = { y: dt.getUTCFullYear(), m: dt.getUTCMonth() + 1, d: dt.getUTCDate() };
+      orbLamOverride = null;              // 日期驱动 → 清除滑杆方向 λ 覆盖
       syncDecl(b.dataset.d);
     } else {
       dateLock = null;                    // decl 驱动 → 清除日期锁存
+      orbLamOverride = null;              // 回退到纬度反解约定
       syncDecl(b.dataset.d);
     }
     // 点击季节按钮 → 该按钮高亮（同一纬度的春分/秋分只点亮被点击的那个）
