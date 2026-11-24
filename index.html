@@ -317,15 +317,18 @@
   </section>
 
   <section class="sec">
-    <div class="sec-title">自转</div>
+    <div class="sec-title">自转 / 公转</div>
     <div class="btnrow">
       <button class="primary" id="btnSpin">⏸ 暂停自转</button>
+      <button id="btnRev" title="地球不自转、仅公转：太阳直射点沿轨道推移，演示一年内的昼夜交替（每地点半年昼、半年夜）；与自转同时开启即为地球真实昼夜变化">▶ 开始公转</button>
+    </div>
+    <div class="btnrow" style="margin-top:8px">
       <button id="btnReset" title="恢复本机当前日期与时间下的昼夜分布（视角、日期、时刻全部复位）">↺ 重置</button>
       <img id="sealImg" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAABaCAYAAAA4qEECAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGsGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDIgNzkuMTY0NDg4LCAyMDIwLzA3LzEwLTIyOjA2OjUzICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjIuMCAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDI2LTA5LTEzVDA3OjI0OjU3KzA4OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyNi0wOS0xM1QxNToxMTozOCswODowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyNi0wOS0xM1QxNToxMTozOCswODowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDowZDExYjZkMS03MjVlLTZiNGQtODljZS0zNGMxOWVmMmQ3NmEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NmMwZTEzMTEtNWNiMi1iZDQ2LTg2MGEtMjA5ZmU4NWE4NGI1IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6NmMwZTEzMTEtNWNiMi1iZDQ2LTg2MGEtMjA5ZmU4NWE4NGI1Ij4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo2YzBlMTMxMS01Y2IyLWJkNDYtODYwYS0yMDlmZTg1YTg0YjUiIHN0RXZ0OndoZW49IjIwMjYtMDktMTNUMDc6MjQ6NTcrMDg6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyMi4wIChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MjhhODA0NmUtYTM5OS0wOTRiLWEwMDQtYTU2MDkyZWQxMjNlIiBzdEV2dDp3aGVuPSIyMDI2LTA5LTEzVDE1OjA1OjAzKzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjIuMCAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjBkMTFiNmQxLTcyNWUtNmI0ZC04OWNlLTM0YzE5ZWYyZDc2YSIgc3RFdnQ6d2hlbj0iMjAyNi0wOS0xM1QxNToxMTozOCswODowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIyLjAgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqVaIE0AAA/pSURBVHic7V1/bBzHdf727kRS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" alt="wangweiqing 印章" title="wangweiqing"
            style="height:32px;width:32px;margin-left:auto;align-self:center;opacity:.95;pointer-events:none">
     </div>
     <div class="ctl col">
-      <span class="mini">自转速度 <b id="spdVal">1.0×</b>（1 天 ≈ 24 秒）</span>
+      <span class="mini">自转 / 公转速度 <b id="spdVal">1.0×</b>（1 天 ≈ 24 秒，1 年 ≈ 2 分钟）</span>
       <input type="range" id="rgSpeed" min="0.25" max="8" step="0.25" value="1">
     </div>
   </section>
@@ -549,6 +552,7 @@ const state = {
   axis: true,
   sunBeam: true,
   spinning: false,    // 默认暂停：打开页面即呈现“赤道上空 0°经线”默认视角，可一键开始自转
+  revolving: false,   // 公转演示（第86轮）：地球惯性朝向不变、λ 沿轨道推进 → 一年内昼夜交替
   speed: 1,
   rotDeg: 0,         // 自转角（绕地轴）
   twilight: 0,        // 晨昏线过渡带宽度（0 = 昼夜半球硬分界）
@@ -560,6 +564,7 @@ const state = {
 };
 const SUN = [1, 0, 0];          // 太阳方向（世界坐标系，固定）
 const ROT_RATE = 15;            // 度/秒 @1x（24 秒一天）
+const REV_RATE = 3;             // 公转演示角速率 度/秒 @1x（λ 走 360° = 1 年 ≈ 120 秒）
 const OBLIQUITY = 23.44;
 const POLE_LABEL_R = 1.22;      // 极点 N/S 文字标注到球心的距离（地轴半长 1.16，第67轮由 1.34 收近）
 
@@ -2977,7 +2982,10 @@ function orbRect() {                            // 面板矩形（CSS px，舞�
    向左=夏至经秋分回冬至）> 纬度反解约定（δ≥0 取春分→夏至段，δ<0 取秋分→冬至段），
    从而保证图中直射点纬度与面板读数一致。 */
 let orbLamOverride = null;      // 滑杆拖动写入的 λ（°），日期锁存优先于它
+let orbRevLam = 0;              // 公转演示驱动写入的 λ（°）；演示运行时为最高优先级
+let revLastDoy = -1;            // 公转演示中上次同步日期选择器的年积日（避免每帧重建 DOM）
 function orbLambda() {
+  if (state.revolving) return orbRevLam;
   if (dateLock) {
     const n = bjNoon(dateLock.y, ymdToDoy(dateLock.y, dateLock.m, dateLock.d));
     const l = sunLambda(n) % 360;
@@ -3234,6 +3242,23 @@ function frame(t) {
   const dt = Math.min(0.05, (t - lastT) / 1000 || 0);
   lastT = t;
   if (state.spinning) state.rotDeg += dt * ROT_RATE * state.speed;
+  /* 公转演示（第86轮）：地球惯性朝向不变（不自转分量不额外施加），λ 以 REV_RATE 沿轨道推进。
+     物理：平太阳时角 rotDeg = 恒星球面朝向 − λ（常数并入标定）→ λ 增加 rotDeg 等量回退。
+     · 仅公转：rotDeg 随 λ 回退 → 太阳直射点绕地球东移一圈/年，每地点半年昼半年夜；
+     · 公转+自转：rotDeg 净速率 = ROT_RATE − REV_RATE → 太阳日长于恒星日（24s→30s @1x），
+       与真实地球「太阳日 > 恒星日」的定性关系一致，季节同时推进。 */
+  if (state.revolving) {
+    const dL = dt * REV_RATE * state.speed;
+    orbRevLam = (orbRevLam + dL) % 360;
+    state.rotDeg -= dL;
+    const d = Math.asin(Math.max(-1, Math.min(1, Math.sin(ORB_EP) * Math.sin(orbRevLam * ORB_RAD)))) / ORB_RAD;
+    state.decl = d;
+    rgDecl.value = d; orbPrevDecl = d;
+    $('declVal').textContent = fmtLatDMS(d);
+    $('seasonTag').textContent = seasonName(d);
+    const doy = declToDoy(d) | 0;
+    if (doy !== revLastDoy) { revLastDoy = doy; syncDateSelects(); }
+  }
   const orbTarget = state.orbHide ? 1 : 0;                    // 公转窗口贴右边收起动画
   orbSlide += (orbTarget - orbSlide) * Math.min(1, dt * 9);
   if (Math.abs(orbSlide - orbTarget) < 0.012) orbSlide = orbTarget;
@@ -3319,11 +3344,12 @@ function syncNow() {                    // 同步本机当前时间（钟表走�
   setBeijingTime(n.getUTCHours() + n.getUTCMinutes() / 60 + n.getUTCSeconds() / 3600 + 8);
 }
 $('tpTime').addEventListener('change', e => {
+  stopRev();                              // 手动设定时刻 → 停止公转演示
   const m = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(e.target.value);
   if (!m) return;
   setBeijingTime(+m[1] + (+m[2]) / 60 + (m[3] ? +m[3] : 0) / 3600);
 });
-$('btnNow').addEventListener('click', syncToNow);
+$('btnNow').addEventListener('click', () => { stopRev(); syncToNow(); });
 
 /* ---- 日期选择（年/月/日）↔ 直射点纬度 双向联动 ----
    选日期 → 自动换算当日太阳直射点纬度（季节）；
@@ -3372,6 +3398,7 @@ function syncDateSelects() {              // 直射点纬度 → 日期选择器
 }
 function applyDateSelects() {             // 日期选择器 → 直射点纬度
   if (dateSyncing) return;
+  stopRev();                              // 手动选日期 → 停止公转演示
   dateSyncing = true;
   const y = +selYear.value, m = +selMon.value;
   fillDaySelects(y, m);
@@ -3430,6 +3457,7 @@ function syncDecl(v, fromSlider) {
   syncDateSelects();                      // 直射点变化 → 日期选择器同步（当年准确日期）
 }
 rgDecl.addEventListener('input', e => {
+  stopRev();                              // 手动拖直射点 → 停止公转演示（避免双重驱动 λ）
   dateLock = null;                        // decl 驱动 → 清除日期锁存
   /* 滑杆方向 → 公转 λ 分支：向右滑 = 冬至(λ=270°) 经春分(0°) 转到夏至(90°)；
      向左滑 = 夏至(90°) 经秋分(180°) 转回冬至(270°)。两条分支在 δ=±ε 端点处重合，
@@ -3448,6 +3476,7 @@ rgDecl.addEventListener('input', e => {
 $('chipsSeason').addEventListener('click', e => {
   const b = e.target.closest('button');
   if (b) {
+    stopRev();                            // 手动选季节 → 停止公转演示
     if (b.dataset.lam !== undefined) {
       // 二至二分：按太阳视黄经（λ=0/90/180/270）求当年准确日期（秋分≠春分，decl=0 有两解）
       const y = +selYear.value || CUR_YEAR;
@@ -3477,7 +3506,36 @@ function syncSpin() {
   btnSpin.textContent = state.spinning ? '⏸ 暂停自转' : '▶ 开始自转';
 }
 btnSpin.addEventListener('click', () => { state.spinning = !state.spinning; syncSpin(); });
+
+/* ---- 公转演示（第86轮）----
+   开始：λ 冻结为当前轨道位置后由帧循环推进；δ/滑杆/日期随 λ 联动；
+   暂停：就地冻结（λ 回退到「纬度反解」约定保持轨道一致），再按 重置/同步当前 回到真实时刻。
+   任何手动设置日期/时刻/直射点的操作都会先停止演示，避免双重驱动。 */
+const btnRev = $('btnRev');
+function syncRev() {
+  btnRev.textContent = state.revolving ? '⏸ 暂停公转' : '▶ 开始公转';
+}
+btnRev.addEventListener('click', () => {
+  if (state.revolving) { stopRev(); return; }
+  const lam0 = orbLambda();                 // 先取当前轨道位置（日期/滑杆/真实日期）
+  state.revolving = true;                   // 再进入演示态（orbLambda 的演示分支才不会短路）
+  orbRevLam = lam0;
+  dateLock = null;                          // λ 改由演示驱动 → 清除其余 λ 来源
+  orbLamOverride = null;
+  orbPrevDecl = null;
+  revLastDoy = -1;
+  document.querySelectorAll('#chipsSeason button.on').forEach(x => x.classList.remove('on'));
+  syncRev();
+});
+function stopRev() {
+  if (!state.revolving) return;
+  state.revolving = false;
+  orbLamOverride = orbRevLam;               // 冻结在当前轨道位置（否则纬度反解会跳回升弧段）
+  syncRev();
+  orbPrevDecl = +rgDecl.value;              // 冻结后的 δ 作为滑杆方向基准
+}
 $('btnReset').addEventListener('click', () => {
+  stopRev();                  // 公转演示停止（如若运行）
   clearPolar();               // 撤销俯视图高亮（视角即将复位）
   Object.assign(cam, CAM0);   // 视角复位：赤道上空、0° 经线居中
   syncToNow();                // 日期 + 时刻复位：回到本机当前日期与时间下的昼夜分布
